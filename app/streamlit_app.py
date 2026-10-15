@@ -18,7 +18,83 @@ from config import CFG  # noqa: E402
 from src.inference.image_predictor import ImagePredictor  # noqa: E402
 from src.inference.video_predictor import VideoPredictor  # noqa: E402
 
-st.set_page_config(page_title="Deepfake Media Detector", page_icon="🕵️", layout="centered")
+st.set_page_config(
+    page_title="Deepfake Media Detector",
+    page_icon="🕵️",
+    layout="wide",
+    initial_sidebar_state="collapsed",
+)
+
+st.markdown(
+    """
+    <style>
+        /* Use more of the available screen without stretching content too far */
+        .block-container {
+            max-width: 1200px;
+            padding-top: 2rem;
+            padding-bottom: 3rem;
+            padding-left: clamp(1rem, 4vw, 3rem);
+            padding-right: clamp(1rem, 4vw, 3rem);
+        }
+
+        /* Clearer page title and section headings */
+        h1 {
+            font-size: clamp(1.8rem, 3vw, 2.6rem) !important;
+            font-weight: 750 !important;
+            letter-spacing: -0.03em;
+        }
+
+        h2, h3 {
+            letter-spacing: -0.02em;
+        }
+
+        /* More comfortable upload and input areas */
+        [data-testid="stFileUploader"] {
+            width: 100%;
+        }
+
+        [data-testid="stFileUploader"] section {
+            border-radius: 12px;
+        }
+
+        /* Consistent button sizing */
+        .stButton > button {
+            min-height: 2.8rem;
+            border-radius: 10px;
+            font-weight: 600;
+            padding: 0.5rem 1.2rem;
+        }
+
+        /* Cleaner tabs */
+        button[data-baseweb="tab"] {
+            font-weight: 600;
+            padding-top: 0.8rem;
+            padding-bottom: 0.8rem;
+        }
+
+        /* Avoid overly wide content on large screens */
+        @media (min-width: 1400px) {
+            .block-container {
+                max-width: 1320px;
+            }
+        }
+
+        /* Compact spacing on mobile */
+        @media (max-width: 640px) {
+            .block-container {
+                padding-top: 1rem;
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+
+            h1 {
+                font-size: 1.8rem !important;
+            }
+        }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
 
 @st.cache_resource(show_spinner="Loading model...")
