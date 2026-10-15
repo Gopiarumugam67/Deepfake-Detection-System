@@ -1,140 +1,185 @@
 # Deepfake Media Detection System
 
-Detects whether a face image or video is **Real** or **Deepfake** using a
-CNN (transfer learning) trained on the
-[140k Real and Fake Faces](https://www.kaggle.com/datasets/xhlulu/140k-real-and-fake-faces)
-dataset.
+A deep learning application that classifies face images and videos as **Real** or **Fake** using EfficientNet-B0, PyTorch, MTCNN face detection, and Streamlit.
 
-## Setup
+The system supports image-level predictions, video frame sampling, per-frame analysis, and an overall video verdict.
 
-```bash
-python -m venv venv
-source venv/bin/activate        # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-```
+## Key Features
 
-## Getting the data
+- Real/fake face classification using transfer learning.
+- MTCNN-based face detection and cropping.
+- Image and video upload through a Streamlit interface.
+- Frame sampling and aggregated video-level predictions.
+- Training with validation, early stopping, and checkpoint saving.
+- Evaluation using accuracy, precision, recall, F1-score, and ROC-AUC.
+- CPU inference support for local Windows deployment.
 
-Download **140k Real and Fake Faces** from Kaggle and place raw images into:
-- `data/raw/real/` — real faces
-- `data/raw/fake/` — GAN-generated faces
+## Model and Dataset
 
-## Running the full pipeline
+**Model:** EfficientNet-B0  
+**Framework:** PyTorch  
+**Face detection:** MTCNN  
+**Interface:** Streamlit
 
-```bash
-# 1. Preprocess
-python -m src.preprocessing.face_extractor    # detect + crop faces
-python -m src.preprocessing.dataset_builder   # stratified split -> data/processed/, data/splits/
+The project uses the [140k Real and Fake Faces dataset](https://www.kaggle.com/datasets/xhlulu/140k-real-and-fake-faces), containing real and GAN-generated face images.
 
-# 2. Train (recommended: on Colab GPU — see Hardware note below)
-python -m src.training.trainer
+For this training run, a prepared subset of **4,999 face images** was used, preserving the original dataset split:
 
-# 3. Evaluate on the held-out test set
-python -m src.evaluation.evaluator            # -> reports/metrics.json, confusion_matrix.png, roc_curve.png
+| Split | Images |
+|---|---:|
+| Training | 3,499 |
+| Validation | 750 |
+| Testing | 750 |
+| **Total** | **4,999** |
 
-# 4. Run inference
-python -m src.inference.image_predictor path/to/image.jpg
-python -m src.inference.video_predictor path/to/video.mp4
+The face images were prepared before training, and CSV manifests were generated for the training, validation, and test splits.
 
-# 5. Launch the app
-streamlit run app/streamlit_app.py
-```
+## Model Performance
 
-## Project structure
+The model was trained for 20 epochs using a Tesla T4 GPU in Google Colab. The best checkpoint was selected using validation loss.
 
-```
+**Held-out test results:**
+
+| Metric | Result |
+|---|---:|
+| Accuracy | 89.47% |
+| Precision | 89.78% |
+| Recall | 89.07% |
+| F1-score | 89.42% |
+| ROC-AUC | 96.27% |
+| Test samples | 750 |
+
+The best validation accuracy reached 90.53%.
+
+Evaluation artifacts include a confusion matrix, ROC curve, classification report, and machine-readable metrics.
+
+These results apply to the prepared test set. Performance on other datasets, real-world footage, face swaps, and lip-sync manipulations may differ.
+
+## Project Structure
+
+```text
 deepfake-detection/
-├── config.py                     # single source of truth for paths & hyperparameters
-├── requirements.txt
+├── app/
+│   └── streamlit_app.py
+├── checkpoints/
+│   └── best_efficientnet_b0.pt
 ├── data/
-│   ├── raw/{real,fake}/          # your downloaded dataset goes here
-│   ├── processed/{train,val,test}/{real,fake}/
-│   └── splits/{train,val,test}.csv
+│   ├── raw/
+│   ├── processed/
+│   └── splits/
+├── logs/
+├── reports/
 ├── src/
-│   ├── preprocessing/
-│   │   ├── face_extractor.py     # MTCNN face detection + cropping
-│   │   └── dataset_builder.py    # stratified splitting + manifest CSVs
 │   ├── data/
-│   │   ├── dataset.py            # PyTorch Dataset + DataLoader factory
-│   │   └── augmentation.py       # Albumentations train/eval pipelines
-│   ├── models/
-│   │   └── xception_model.py     # timm-backed model factory + checkpoint I/O
-│   ├── training/
-│   │   └── trainer.py            # training loop, early stopping, checkpointing
+│   │   ├── dataset.py
+│   │   └── augmentation.py
 │   ├── evaluation/
-│   │   └── evaluator.py          # metrics, confusion matrix, ROC-AUC
+│   │   └── evaluator.py
 │   ├── inference/
-│   │   ├── image_predictor.py    # single-image prediction
-│   │   └── video_predictor.py    # frame sampling + video-level prediction
+│   │   ├── image_predictor.py
+│   │   └── video_predictor.py
+│   ├── models/
+│   │   └── xception_model.py
+│   ├── preprocessing/
+│   │   ├── face_extractor.py
+│   │   └── dataset_builder.py
+│   ├── training/
+│   │   └── trainer.py
 │   └── utils/
 │       └── logger.py
-├── app/
-│   └── streamlit_app.py          # deployment UI
-├── checkpoints/                  # saved model weights
-├── reports/                      # metrics.json, confusion_matrix.png, roc_curve.png (generated)
-├── logs/
-└── tests/
+├── tests/
+├── config.py
+├── requirements.txt
+└── README.md
 ```
 
-## Model choice
+## Run the Trained Application on Windows
 
-| Model | Why / why not |
-|---|---|
-| **Xception** | Depthwise-separable convs pretrained on ImageNet; this is the architecture the original FaceForensics++ paper used for deepfake detection, so it's a well-validated, defensible choice for an interview. Good accuracy-to-compute ratio. |
-| **EfficientNet-B0** (default here) | Comparable accuracy, fewer params, faster to train — the default in this repo because the dev machine is CPU-only. Also a good fit for Streamlit Cloud's free tier. |
-| ResNet50 | Solid baseline, well understood, slightly weaker on fine-grained artifact detection than Xception. |
-| ViT-Base | Best ceiling accuracy with enough data, but needs more data/compute to avoid overfitting — riskier for a first pass on 140k images with limited GPU time. |
+### 1. Clone the repository
 
-`config.py` lets you switch `TrainConfig.model_name` between these without touching code elsewhere.
+```powershell
+git clone https://github.com/Gopiarumugam67/Deepfake-Detection-System.git
+cd Deepfake-Detection-System
+```
 
-## Hardware note (CPU-only training)
+If you already have the project locally, open its existing folder instead.
 
-Confirmed dev machine: i5-1135G7, 8GB RAM, no CUDA GPU. `config.py` defaults
-are tuned for this (`efficientnet_b0`, `batch_size=16`, `num_workers=2`). Use
-this machine to build/test the pipeline end-to-end on a small subset of data.
-For the **actual full training run**, use **Google Colab's free GPU tier** —
-upload this repo, switch `TrainConfig.model_name` back to `"xception"` if you
-want the paper-accurate architecture, bump `batch_size` to 32, and train
-there. Download the resulting checkpoint back into `checkpoints/` for local
-inference/Streamlit.
+### 2. Create and activate a virtual environment
 
----
+```powershell
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+```
 
-## Running tests
+### 3. Install dependencies
+
+```powershell
+python -m pip install -r requirements.txt
+```
+
+If a dependency installation fails, resolve that package issue before continuing.
+
+### 4. Add the trained checkpoint
+
+Place the trained checkpoint at:
+
+```text
+checkpoints/best_efficientnet_b0.pt
+```
+
+The checkpoint is generated during training and is not necessarily included in the Git repository. Obtain it from the project's training artifacts.
+
+### 5. Launch Streamlit
+
+```powershell
+python -m streamlit run app/streamlit_app.py
+```
+
+Open `http://localhost:8501` in your browser.
+
+The application supports image uploads and video uploads. Video analysis samples frames, predicts each detected face, and aggregates the frame-level fake probabilities into a video-level verdict.
+
+## Training and Evaluation
+
+For model development, use a GPU-enabled environment such as Google Colab.
+
+After preparing the dataset and creating the split manifests, run:
 
 ```bash
-pip install -r requirements-dev.txt
-pytest
+python -m src.training.trainer
+python -m src.evaluation.evaluator
 ```
 
-`tests/test_dataset_builder.py` needs no ML libraries and runs standalone
-(uses `opencv-python-headless`, `pandas`, `scikit-learn` only). The inference
-tests (`test_image_predictor.py`, `test_video_predictor.py`) import the real
-modules, so `torch` etc. from `requirements.txt` must be installed — they
-bypass `__init__` (no checkpoint/MTCNN needed) and inject fake predictors to
-test the aggregation/labeling *logic* in isolation.
+Training saves the best checkpoint under `checkpoints/` and the epoch history under `logs/`. Evaluation saves the metrics and visualizations under `reports/`.
 
----
+**Important:** The preprocessing scripts can regenerate datasets and manifests. Preserve the existing split files if you need to reproduce the reported experiment.
 
-## Project Status — core system complete
+## Running Tests
 
-**Completed (full pipeline, end to end)**
-- Project scaffolding (folder structure, config, logging)
-- `src/preprocessing/face_extractor.py` — MTCNN-based face detection/cropping for images and video
-- `src/preprocessing/dataset_builder.py` — stratified train/val/test split with CSV manifests
-- `src/data/augmentation.py` — Albumentations pipelines (train: flips/rotation/color jitter/compression-blur-noise; eval: resize+normalize only)
-- `src/data/dataset.py` — `DeepfakeFaceDataset` + `get_dataloaders()`
-- `src/models/xception_model.py` — model factory (xception/efficientnet_b0/resnet50/vit_base) + checkpoint save/load
-- `src/training/trainer.py` — training loop: `EarlyStopping`, `AdamW` + `ReduceLROnPlateau`, per-epoch history CSV, best-checkpoint saving
-- `src/evaluation/evaluator.py` — accuracy/precision/recall/F1/ROC-AUC, confusion matrix + ROC curve plots, `reports/metrics.json`
-- `src/inference/image_predictor.py` — single-image Real/Fake prediction with confidence
-- `src/inference/video_predictor.py` — frame sampling + per-frame prediction + averaged video-level verdict
-- `app/streamlit_app.py` — full upload UI (image tab, video tab, about/limitations tab)
-- `tests/` — 13 unit tests: dataset-split logic (verified passing, 6/6), image/video prediction-aggregation logic (verified importable+syntax-correct; run locally with `torch` installed)
+Install the development dependencies if the repository provides a `requirements-dev.txt` file, then run:
 
-**Not yet done**
-- Actual training run + real metrics/screenshots to paste into this README (do this after running the pipeline on real data)
-- Optional extras: Grad-CAM visualization for interpretability, a FastAPI REST API alongside Streamlit, FaceForensics++ video-based v2 for face-swap/lip-sync deepfakes (a different artifact type than GAN still-image fakes)
+```bash
+python -m pytest -v
+```
 
-**Recommended next step**
-Get the dataset, run the pipeline end-to-end locally on a small subset (a few hundred images) to catch environment-specific bugs, then do the full training run on Colab. Once you have real metrics, paste them into this section and add 2-3 Streamlit screenshots — that's what turns this from "code" into a portfolio piece.
+Check the current test suite and its results before reporting a passing test count.
+
+## Limitations
+
+- The model was trained on a relatively small prepared subset of face images.
+- Training data focused on real and GAN-generated still-face images; performance on face-swap and lip-sync video manipulations has not been established.
+- Predictions depend on face visibility, image quality, and the input distribution.
+- Confidence scores are model outputs, not calibrated guarantees of authenticity.
+- Video predictions aggregate sampled frames and may miss manipulation artifacts between sampled frames.
+
+## Future Improvements
+
+- Evaluate on larger and more diverse datasets.
+- Add FaceForensics++ or other video-manipulation datasets.
+- Investigate Grad-CAM visualizations for model interpretability.
+- Add a FastAPI inference endpoint.
+- Improve robustness testing and document performance across manipulation types.
+
+## Technologies
+
+Python · PyTorch · EfficientNet-B0 · timm · OpenCV · MTCNN · Albumentations · scikit-learn · Streamlit · Google Colab
