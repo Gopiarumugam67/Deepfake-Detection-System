@@ -1,0 +1,15 @@
+torch>=2.1.0
+torchvision>=0.16.0
+timm>=0.9.12                 # pretrained Xception / EfficientNet backbones
+opencv-python>=4.9.0.80
+facenet-pytorch>=2.5.3       # MTCNN face detector
+numpy>=1.26.0
+pandas>=2.1.0
+scikit-learn>=1.4.0
+matplotlib>=3.8.0
+seaborn>=0.13.0
+albumentations>=1.4.0        # image augmentation
+tqdm>=4.66.0
+streamlit>=1.32.0
+Pillow>=10.2.0
+pyyaml>=6.0.1
