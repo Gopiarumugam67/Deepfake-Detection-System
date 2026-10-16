@@ -197,7 +197,11 @@ My interests include AI/ML engineering, Python development, and building practic
 
 ## 📄 License
 
-Please refer to the repository's `LICENSE` file, if present, for the applicable terms of use. Third-party models, datasets, and pretrained weights may have separate licensing requirements.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+Copyright © 2026 Gopinath A.
+
+**Note:** Third-party libraries, pretrained models, and datasets may be subject to separate licenses and terms of use.
 
 ---
 
