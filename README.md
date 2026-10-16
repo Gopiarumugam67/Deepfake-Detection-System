@@ -1,44 +1,39 @@
-# Deepfake Media Detection System
+# 🛡️ Deepfake Detection System
 
-A deep learning application that classifies face images and videos as **Real** or **Fake** using EfficientNet-B0, PyTorch, MTCNN face detection, and Streamlit.
+### AI-Powered Image & Video Authenticity Analysis
 
-The system supports image-level predictions, video frame sampling, per-frame analysis, and an overall video verdict.
+An end-to-end deep learning application that analyzes facial images and video frames to classify them as **Real or Fake** using an EfficientNet-B0 model. Built with Python, PyTorch, OpenCV, and Streamlit, this project combines model inference, face extraction, video analysis, evaluation, and automated testing in a practical AI application.
 
-## Key Features
+**Built with dedication by Gopinath A** — Computer Science Engineer specializing in Artificial Intelligence and Machine Learning.
 
-- Real/fake face classification using transfer learning.
-- MTCNN-based face detection and cropping.
-- Image and video upload through a Streamlit interface.
-- Frame sampling and aggregated video-level predictions.
-- Training with validation, early stopping, and checkpoint saving.
-- Evaluation using accuracy, precision, recall, F1-score, and ROC-AUC.
-- CPU inference support for local Windows deployment.
+[GitHub Repository](https://github.com/Gopiarumugam67/Deepfake-Detection-System) · [Developer Profile](https://github.com/Gopiarumugam67)
 
-## Model and Dataset
+---
 
-**Model:** EfficientNet-B0  
-**Framework:** PyTorch  
-**Face detection:** MTCNN  
-**Interface:** Streamlit
+## 📌 Project Overview
 
-The project uses the [140k Real and Fake Faces dataset](https://www.kaggle.com/datasets/xhlulu/140k-real-and-fake-faces), containing real and GAN-generated face images.
+The growing accessibility of synthetic media makes it increasingly important to analyze the authenticity of digital content. This project explores deep learning–based facial analysis to identify potential deepfakes in images and videos.
 
-For this training run, a prepared subset of **4,999 face images** was used, preserving the original dataset split:
+The application extracts facial regions, runs model inference, and produces a prediction with a confidence score. For videos, it samples frames, analyzes detected faces, and aggregates their fake probabilities into a video-level result.
 
-| Split | Images |
-|---|---:|
-| Training | 3,499 |
-| Validation | 750 |
-| Testing | 750 |
-| **Total** | **4,999** |
+The goal is to provide a practical demonstration of applied deep learning, computer vision, model evaluation, and application development.
 
-The face images were prepared before training, and CSV manifests were generated for the training, validation, and test splits.
+## ✨ Key Features
 
-## Model Performance
+- **Image Classification:** Analyze uploaded facial images and obtain a Real/Fake prediction.
+- **Video Analysis:** Sample video frames and aggregate predictions into a single verdict.
+- **Face Extraction:** Detect and extract facial regions before classification.
+- **Confidence Scoring:** Display the model's prediction confidence.
+- **Interactive Web Interface:** Use a Streamlit application for image and video analysis.
+- **Model Evaluation:** Assess performance using classification metrics and ROC-AUC.
+- **Error Handling:** Handle invalid or unreadable video files without producing a misleading verdict.
+- **Automated Testing:** Validate dataset-building and inference logic using pytest.
 
-The model was trained for 20 epochs using a Tesla T4 GPU in Google Colab. The best checkpoint was selected using validation loss.
+## 🧠 Model & Performance
 
-**Held-out test results:**
+The system uses **EfficientNet-B0**, initialized with pretrained weights and fine-tuned for binary facial image classification.
+
+### Test-set results
 
 | Metric | Result |
 |---|---:|
@@ -47,64 +42,58 @@ The model was trained for 20 epochs using a Tesla T4 GPU in Google Colab. The be
 | Recall | 89.07% |
 | F1-score | 89.42% |
 | ROC-AUC | 96.27% |
-| Test samples | 750 |
 
-The best validation accuracy reached 90.53%.
+**Training configuration**
 
-Evaluation artifacts include a confusion matrix, ROC curve, classification report, and machine-readable metrics.
+- Architecture: EfficientNet-B0
+- Input image size: 224 × 224
+- Training duration: 20 epochs
+- Training environment: Google Colab with NVIDIA Tesla T4 GPU
+- Prepared dataset: 4,999 cropped facial images
+- Dataset split: 3,499 training, 750 validation, and 750 test images
 
-These results apply to the prepared test set. Performance on other datasets, real-world footage, face swaps, and lip-sync manipulations may differ.
+These results describe performance on the project's existing test split. They should not be interpreted as a guarantee of accuracy on unseen datasets or every deepfake generation technique.
 
-## Project Structure
+## 🏗️ System Workflow
 
-```text
-deepfake-detection/
-├── app/
-│   └── streamlit_app.py
-├── checkpoints/
-│   └── best_efficientnet_b0.pt
-├── data/
-│   ├── raw/
-│   ├── processed/
-│   └── splits/
-├── logs/
-├── reports/
-├── src/
-│   ├── data/
-│   │   ├── dataset.py
-│   │   └── augmentation.py
-│   ├── evaluation/
-│   │   └── evaluator.py
-│   ├── inference/
-│   │   ├── image_predictor.py
-│   │   └── video_predictor.py
-│   ├── models/
-│   │   └── xception_model.py
-│   ├── preprocessing/
-│   │   ├── face_extractor.py
-│   │   └── dataset_builder.py
-│   ├── training/
-│   │   └── trainer.py
-│   └── utils/
-│       └── logger.py
-├── tests/
-├── config.py
-├── requirements.txt
-└── README.md
-```
+1. **Input:** Upload a facial image or video through the Streamlit interface.
+2. **Validation:** Check the input and handle unsupported or unreadable video files.
+3. **Preprocessing:** Detect and extract facial regions.
+4. **Inference:** Run EfficientNet-B0 on the extracted facial images.
+5. **Aggregation:** For videos, average the frame-level fake probabilities.
+6. **Output:** Display the predicted label and confidence score.
 
-## Run the Trained Application on Windows
+## 🛠️ Technology Stack
+
+| Category | Technologies |
+|---|---|
+| Language | Python |
+| Deep Learning | PyTorch, EfficientNet-B0 |
+| Computer Vision | OpenCV, MTCNN |
+| Web Application | Streamlit |
+| Data Processing | NumPy |
+| Testing | pytest |
+| Development Tools | Git, GitHub, Google Colab |
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Python 3.10
+- Git
+- A compatible PyTorch environment
+- The trained model checkpoint
 
 ### 1. Clone the repository
 
-```powershell
+```bash
 git clone https://github.com/Gopiarumugam67/Deepfake-Detection-System.git
 cd Deepfake-Detection-System
 ```
 
-If you already have the project locally, open its existing folder instead.
-
 ### 2. Create and activate a virtual environment
+
+**Windows PowerShell**
 
 ```powershell
 python -m venv venv
@@ -114,72 +103,104 @@ python -m venv venv
 ### 3. Install dependencies
 
 ```powershell
-python -m pip install -r requirements.txt
+python -m pip install --upgrade pip
+pip install -r requirements.txt
 ```
 
-If a dependency installation fails, resolve that package issue before continuing.
+### 4. Verify the model checkpoint
 
-### 4. Add the trained checkpoint
-
-Place the trained checkpoint at:
+Ensure the trained checkpoint is available at:
 
 ```text
 checkpoints/best_efficientnet_b0.pt
 ```
 
-The checkpoint is generated during training and is not necessarily included in the Git repository. Obtain it from the project's training artifacts.
+If the checkpoint is not present in your clone, obtain the trained checkpoint separately and place it at the expected path. Do not commit large datasets or model artifacts without checking repository size and licensing requirements.
 
-### 5. Launch Streamlit
+### 5. Launch the application
 
 ```powershell
 python -m streamlit run app/streamlit_app.py
 ```
 
-Open `http://localhost:8501` in your browser.
+Open the local URL displayed in your terminal, then choose the image or video analysis interface.
 
-The application supports image uploads and video uploads. Video analysis samples frames, predicts each detected face, and aggregates the frame-level fake probabilities into a video-level verdict.
+## 🧪 Testing
 
-## Training and Evaluation
+Run the automated test suite:
 
-For model development, use a GPU-enabled environment such as Google Colab.
-
-After preparing the dataset and creating the split manifests, run:
-
-```bash
-python -m src.training.trainer
-python -m src.evaluation.evaluator
-```
-
-Training saves the best checkpoint under `checkpoints/` and the epoch history under `logs/`. Evaluation saves the metrics and visualizations under `reports/`.
-
-**Important:** The preprocessing scripts can regenerate datasets and manifests. Preserve the existing split files if you need to reproduce the reported experiment.
-
-## Running Tests
-
-Install the development dependencies if the repository provides a `requirements-dev.txt` file, then run:
-
-```bash
+```powershell
 python -m pytest -v
 ```
 
-Check the current test suite and its results before reporting a passing test count.
+**Latest verified result:** 13 tests passed.
 
-## Limitations
+The current suite covers dataset-building behavior, image prediction outcomes, video prediction aggregation, and the no-face result path. Invalid-video handling has also been manually verified in the Streamlit application.
 
-- The model was trained on a relatively small prepared subset of face images.
-- Training data focused on real and GAN-generated still-face images; performance on face-swap and lip-sync video manipulations has not been established.
-- Predictions depend on face visibility, image quality, and the input distribution.
-- Confidence scores are model outputs, not calibrated guarantees of authenticity.
-- Video predictions aggregate sampled frames and may miss manipulation artifacts between sampled frames.
+## 📁 Project Structure
 
-## Future Improvements
+```text
+Deepfake-Detection-System/
+├── app/
+│   └── streamlit_app.py
+├── checkpoints/
+│   └── best_efficientnet_b0.pt
+├── config/
+├── src/
+│   ├── inference/
+│   │   ├── image_predictor.py
+│   │   └── video_predictor.py
+│   ├── preprocessing/
+│   │   └── face_extractor.py
+│   ├── models/
+│   └── utils/
+├── tests/
+│   ├── test_dataset_builder.py
+│   ├── test_image_predictor.py
+│   └── test_video_predictor.py
+├── requirements.txt
+├── pytest.ini
+└── README.md
+```
 
-- Evaluate on larger and more diverse datasets.
-- Add FaceForensics++ or other video-manipulation datasets.
-- Investigate Grad-CAM visualizations for model interpretability.
-- Add a FastAPI inference endpoint.
-- Improve robustness testing and document performance across manipulation types.
+*Note: The tree highlights key project components; other files and directories may exist in the repository.*
 
-## Technologies
+## ⚠️ Limitations
 
-Python · PyTorch · EfficientNet-B0 · timm · OpenCV · MTCNN · Albumentations · scikit-learn · Streamlit · Google Colab
+- Performance depends on the quality of the input, face detection, and the model's training data.
+- The reported test metrics do not establish generalization to every unseen dataset.
+- Performance on face-swap, lip-sync, and other deepfake techniques has not been independently established.
+- A Real/Fake label is a model prediction, not definitive proof of authenticity or manipulation.
+- This project is intended for educational and research demonstration purposes, not as a standalone forensic verification tool.
+
+## 🔭 Future Improvements
+
+- Evaluate generalization on diverse public deepfake benchmarks.
+- Explore video-level temporal modeling instead of averaging frame predictions alone.
+- Add explainability visualizations, such as Grad-CAM.
+- Expand automated tests for malformed inputs and edge cases.
+- Optimize inference latency and improve deployment readiness.
+
+## 👨‍💻 About the Developer
+
+**Gopinath A**  
+Computer Science Engineer | Artificial Intelligence & Machine Learning
+
+I developed this project to apply deep learning and computer vision to a practical media-authenticity problem. The work includes model training and evaluation, facial preprocessing, image and video inference, an interactive Streamlit interface, error handling, and automated testing.
+
+My interests include AI/ML engineering, Python development, and building practical, end-to-end software systems.
+
+- **GitHub:** [Gopiarumugam67](https://github.com/Gopiarumugam67)
+- **Project:** [Deepfake Detection System](https://github.com/Gopiarumugam67/Deepfake-Detection-System)
+
+*Designed, developed, and maintained by Gopinath A.*
+
+## 📄 License
+
+Please refer to the repository's `LICENSE` file, if present, for the applicable terms of use. Third-party models, datasets, and pretrained weights may have separate licensing requirements.
+
+---
+
+⭐ **If you find this project useful, consider starring the repository on GitHub.**
+
+*Built by me (Gk) with Python, deep learning, and a commitment to continuous learning.*
